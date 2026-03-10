@@ -1,0 +1,1203 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "target",
+        "type": "address"
+      }
+    ],
+    "name": "AddressEmptyCode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadyInitialized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AssetDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ConfigurationAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "implementation",
+        "type": "address"
+      }
+    ],
+    "name": "ERC1967InvalidImplementation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ERC1967NonPayable",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidInitialization",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotInitializing",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UUPSUnauthorizedCallContext",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "slot",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UUPSUnsupportedProxiableUUID",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidateCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidationFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint128",
+            "name": "supplyCap",
+            "type": "uint128"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct LendingConfiguration.AssetConfig",
+        "name": "assetConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "AddAsset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "version",
+        "type": "uint64"
+      }
+    ],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newLending",
+        "type": "address"
+      }
+    ],
+    "name": "LendingDeployed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "lendingPriceSource",
+            "type": "address"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "storeFrontPriceFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint104",
+            "name": "baseBorrowMin",
+            "type": "uint104"
+          },
+          {
+            "internalType": "uint104",
+            "name": "targetReserves",
+            "type": "uint104"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "decimals",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint64",
+                "name": "borrowCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidateCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidationFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint128",
+                "name": "supplyCap",
+                "type": "uint128"
+              }
+            ],
+            "internalType": "struct LendingConfiguration.AssetConfig[]",
+            "name": "assetConfigs",
+            "type": "tuple[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct LendingConfiguration.Configuration",
+        "name": "oldConfiguration",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "lendingPriceSource",
+            "type": "address"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "storeFrontPriceFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint104",
+            "name": "baseBorrowMin",
+            "type": "uint104"
+          },
+          {
+            "internalType": "uint104",
+            "name": "targetReserves",
+            "type": "uint104"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "decimals",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint64",
+                "name": "borrowCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidateCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidationFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint128",
+                "name": "supplyCap",
+                "type": "uint128"
+              }
+            ],
+            "internalType": "struct LendingConfiguration.AssetConfig[]",
+            "name": "assetConfigs",
+            "type": "tuple[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct LendingConfiguration.Configuration",
+        "name": "newConfiguration",
+        "type": "tuple"
+      }
+    ],
+    "name": "SetConfiguration",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldFactory",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newFactory",
+        "type": "address"
+      }
+    ],
+    "name": "SetFactory",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidateCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidationFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint128",
+            "name": "supplyCap",
+            "type": "uint128"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct LendingConfiguration.AssetConfig",
+        "name": "oldAssetConfig",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidateCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidationFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint128",
+            "name": "supplyCap",
+            "type": "uint128"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct LendingConfiguration.AssetConfig",
+        "name": "newAssetConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "UpdateAsset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "implementation",
+        "type": "address"
+      }
+    ],
+    "name": "Upgraded",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "UPGRADE_INTERFACE_VERSION",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidateCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidationFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint128",
+            "name": "supplyCap",
+            "type": "uint128"
+          }
+        ],
+        "internalType": "struct LendingConfiguration.AssetConfig",
+        "name": "assetConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "addAsset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "configuratorParams",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "baseToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "lendingPriceSource",
+        "type": "address"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyKink",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyPerYearInterestRateSlopeLow",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyPerYearInterestRateSlopeHigh",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyPerYearInterestRateBase",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowKink",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowPerYearInterestRateSlopeLow",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowPerYearInterestRateSlopeHigh",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowPerYearInterestRateBase",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "storeFrontPriceFactor",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint104",
+        "name": "baseBorrowMin",
+        "type": "uint104"
+      },
+      {
+        "internalType": "uint104",
+        "name": "targetReserves",
+        "type": "uint104"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      }
+    ],
+    "name": "deploy",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "factory",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getAssetIndex",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      }
+    ],
+    "name": "getConfiguration",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "lendingPriceSource",
+            "type": "address"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "storeFrontPriceFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint104",
+            "name": "baseBorrowMin",
+            "type": "uint104"
+          },
+          {
+            "internalType": "uint104",
+            "name": "targetReserves",
+            "type": "uint104"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "decimals",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint64",
+                "name": "borrowCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidateCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidationFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint128",
+                "name": "supplyCap",
+                "type": "uint128"
+              }
+            ],
+            "internalType": "struct LendingConfiguration.AssetConfig[]",
+            "name": "assetConfigs",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct LendingConfiguration.Configuration",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proxiableUUID",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "lendingPriceSource",
+            "type": "address"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "supplyPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowKink",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeLow",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateSlopeHigh",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowPerYearInterestRateBase",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "storeFrontPriceFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint104",
+            "name": "baseBorrowMin",
+            "type": "uint104"
+          },
+          {
+            "internalType": "uint104",
+            "name": "targetReserves",
+            "type": "uint104"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "uint8",
+                "name": "decimals",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint64",
+                "name": "borrowCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidateCollateralFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint64",
+                "name": "liquidationFactor",
+                "type": "uint64"
+              },
+              {
+                "internalType": "uint128",
+                "name": "supplyCap",
+                "type": "uint128"
+              }
+            ],
+            "internalType": "struct LendingConfiguration.AssetConfig[]",
+            "name": "assetConfigs",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct LendingConfiguration.Configuration",
+        "name": "newConfiguration",
+        "type": "tuple"
+      }
+    ],
+    "name": "setConfiguration",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "newFactory",
+        "type": "address"
+      }
+    ],
+    "name": "setFactory",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint64",
+            "name": "borrowCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidateCollateralFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "liquidationFactor",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint128",
+            "name": "supplyCap",
+            "type": "uint128"
+          }
+        ],
+        "internalType": "struct LendingConfiguration.AssetConfig",
+        "name": "newAssetConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "updateAsset",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint64",
+        "name": "newBorrowCF",
+        "type": "uint64"
+      }
+    ],
+    "name": "updateAssetBorrowCollateralFactor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "lendingProxy",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint128",
+        "name": "newSupplyCap",
+        "type": "uint128"
+      }
+    ],
+    "name": "updateAssetSupplyCap",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newImplementation",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "upgradeToAndCall",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]

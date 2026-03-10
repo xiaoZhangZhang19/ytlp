@@ -1,0 +1,34 @@
+{
+  "network": "bscTestnet",
+  "chainId": "97",
+  "configurer": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+  "timestamp": "2026-01-12T05:55:25.677Z",
+  "configuration": {
+    "permissions": {
+      "usdyVaults": [
+        "0xA6CD153c2fa0C2725605880668538660Ca21a790",
+        "0xb11824eAA659F8A4648711709dA60720d5Cdabd2"
+      ],
+      "ytlpMinters": [
+        "0xb11824eAA659F8A4648711709dA60720d5Cdabd2"
+      ],
+      "ytlpPoolManager": "0xb11824eAA659F8A4648711709dA60720d5Cdabd2",
+      "vaultPoolManager": "0xb11824eAA659F8A4648711709dA60720d5Cdabd2",
+      "vaultSwappers": [
+        "0x5af5A51F7702024E7387bba7497DC9965C00F16E"
+      ],
+      "poolManagerHandlers": [
+        "0x5af5A51F7702024E7387bba7497DC9965C00F16E"
+      ],
+      "priceFeedKeepers": [
+        "0xa013422A5918CD099C63c8CC35283EACa99a705d"
+      ],
+      "usdcPriceSource": "Chainlink (自动)"
+    },
+    "parameters": {
+      "dynamicFees": true,
+      "maxSwapSlippageBps": 1000,
+      "maxPriceChangeBps": 500
+    }
+  }
+}

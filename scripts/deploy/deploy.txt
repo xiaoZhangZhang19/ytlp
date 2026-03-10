@@ -1,0 +1,8 @@
+npx hardhat run scripts/deploy/01-prepareUSDC.ts --network bscTestnet
+npx hardhat run scripts/deploy/02-deployYTLp.ts --network bscTestnet 
+npx hardhat run scripts/deploy/03-deployAsset.ts --network bscTestnet 
+npx hardhat run scripts/deploy/04-createVault.ts --network bscTestnet 
+npx hardhat run scripts/deploy/05-configureYTLp.ts --network bscTestnet 
+npx hardhat run scripts/deploy/06-addVaultToWhitelist.ts --network bscTestnet
+npx hardhat run scripts/deploy/07-deployLending.ts --network bscTestnet
+npx hardhat run scripts/deploy/08-configureLending.ts --network bscTestnet

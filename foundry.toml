@@ -1,0 +1,11 @@
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['node_modules', 'lib']
+test = 'test'
+cache_path  = 'cache_forge'
+via_ir = true
+optimizer = true
+optimizer_runs = 200
+offline = true
+no_storage_caching = true

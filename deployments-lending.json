@@ -1,0 +1,44 @@
+{
+  "97": {
+    "lendingFactory": "0x10E6Ad7b8a801857F3A96A5178D7baf5C34a5B83",
+    "lendingPriceFeedProxy": "0xa280F5FD7AA093572BEb791d7f9CC8Ec8EA57A15",
+    "lendingPriceFeed": "0xa280F5FD7AA093572BEb791d7f9CC8Ec8EA57A15",
+    "lendingPriceFeedImpl": "0xF1aAd358d6E20Ba946786Bb3E5d34D42F4740dd2",
+    "configuratorProxy": "0x189Fe9dbB2f7dA538D3191159fd661779D7BCBd6",
+    "configuratorImpl": "0xF553843cb7F35378Fd4020d2DFceb90BfD760552",
+    "lendingImpl": "0xBA8f2b5b7281Cd6E49dF229819E824bE0CEA6Ea3",
+    "usdcAddress": "0x939cf46F7A4d05da2a37213E7379a8b04528F590",
+    "usdcPriceFeed": "0x90c069C4538adAc136E051052E14c1cD799C41B7",
+    "deployTimestamp": "2026-01-12T05:59:53.030Z",
+    "deployer": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+    "lendingProxy": "0xfdbFD4656b74aD16F23264121eD9F58219f5C3Cf",
+    "collateralAssets": [
+      {
+        "name": "YT Token A",
+        "symbol": "YT-A",
+        "address": "0x7f9eEA491eE53045594ee4669327f0355aCd0e58"
+      },
+      {
+        "name": "YT Token B",
+        "symbol": "YT-B",
+        "address": "0x20B94C5E5b7361552E0548161a58696aA6FeDBd4"
+      },
+      {
+        "name": "YT Token C",
+        "symbol": "YT-C",
+        "address": "0x0EF308D70cf35460E26a3Eb42F3442Ff28cbE07C"
+      }
+    ],
+    "configTimestamp": "2026-01-12T06:00:25.232Z",
+    "upgradeHistory": [
+      {
+        "timestamp": "2026-03-09T07:51:10.667Z",
+        "contract": "Lending",
+        "oldImplementation": "0xc20e1Dd1eb781C344489828CE3BFCA318CB51430",
+        "newImplementation": "0xBA8f2b5b7281Cd6E49dF229819E824bE0CEA6Ea3",
+        "upgrader": "0xa013422A5918CD099C63c8CC35283EACa99a705d"
+      }
+    ],
+    "lendingUpgradeTimestamp": "2026-03-09T07:51:10.667Z"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "network": "bscTestnet",
+  "chainId": "97",
+  "deployer": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+  "timestamp": "2026-01-12T05:53:28.316Z",
+  "contracts": {
+    "USDY": {
+      "proxy": "0x29774970556407fAE16BC07e87704fE0E9559BC4",
+      "implementation": "0xb14d186d4EAcE8131a449126c6208165a3F5FC5b"
+    },
+    "YTLPToken": {
+      "proxy": "0x17c1100b02d560549b499561dB8d7D48fc391cf3",
+      "implementation": "0x48aeC139406e97784eaD3fc8205863387a5639D7"
+    },
+    "YTPriceFeed": {
+      "proxy": "0x293d00fB683f15eA5a3143ecb551a0aCCbEC42Be",
+      "implementation": "0xD8EE97333D42d8121c877840928288A121E3Cdef"
+    },
+    "YTVault": {
+      "proxy": "0xA6CD153c2fa0C2725605880668538660Ca21a790",
+      "implementation": "0x61278a2EBFC07eF0F7f84407291aAD07DA596AB2"
+    },
+    "YTPoolManager": {
+      "proxy": "0xb11824eAA659F8A4648711709dA60720d5Cdabd2",
+      "implementation": "0xf4cE104E687F5d2064481cbD5B24ED52d7C324b0"
+    },
+    "YTRewardRouter": {
+      "proxy": "0x5af5A51F7702024E7387bba7497DC9965C00F16E",
+      "implementation": "0x3688CDd7A25613E7b1E7E0ee1aA46c21F66D27F3"
+    }
+  },
+  "upgradeHistory": [
+    {
+      "timestamp": "2026-03-09T02:23:16.418Z",
+      "contract": "YTPoolManager",
+      "oldImplementation": "0x144cC96e9b1DC5EC118DF49167DA83048A3050ae",
+      "newImplementation": "0xf4cE104E687F5d2064481cbD5B24ED52d7C324b0",
+      "upgrader": "0xa013422A5918CD099C63c8CC35283EACa99a705d"
+    }
+  ],
+  "lastUpdate": "2026-03-09T02:23:16.418Z"
+}

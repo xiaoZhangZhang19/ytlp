@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+build/
+
+# Hardhat files
+cache/
+artifacts/
+typechain-types/
+
+# Hardhat Ignition default folder for deployments
+ignition/deployments/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+coverage.json
+*.lcov
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gas reports
+gas-report.txt
+
+# Misc
+*.tsbuildinfo
+.eslintcache

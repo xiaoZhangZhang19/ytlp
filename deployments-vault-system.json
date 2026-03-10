@@ -1,0 +1,51 @@
+{
+  "network": "bscTestnet",
+  "chainId": "97",
+  "deployer": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+  "timestamp": "2026-01-12T05:54:13.800Z",
+  "usdcAddress": "0x939cf46F7A4d05da2a37213E7379a8b04528F590",
+  "usdcPriceFeedAddress": "0x90c069C4538adAc136E051052E14c1cD799C41B7",
+  "defaultHardCap": "10000000000000000000000000",
+  "contracts": {
+    "YTAssetVault": {
+      "implementation": "0xB9a9c4d1a8f81a479040fcD30Bf3fca413c203bf"
+    },
+    "YTAssetFactory": {
+      "proxy": "0x37B2CD7D94ba1400a6FEB34804a32EfD555bbfc8",
+      "implementation": "0x6137aAF5903A480888bC72c7b091909421bef45D"
+    }
+  },
+  "vaults": [
+    {
+      "name": "YT Token A",
+      "symbol": "YT-A",
+      "address": "0x7f9eEA491eE53045594ee4669327f0355aCd0e58",
+      "index": "0",
+      "manager": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+      "hardCap": "10000000000000000000000000",
+      "redemptionTime": 1799733295,
+      "ytPrice": "1000000000000000000000000000000"
+    },
+    {
+      "name": "YT Token B",
+      "symbol": "YT-B",
+      "address": "0x20B94C5E5b7361552E0548161a58696aA6FeDBd4",
+      "index": "1",
+      "manager": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+      "hardCap": "10000000000000000000000000",
+      "redemptionTime": 1799733295,
+      "ytPrice": "1000000000000000000000000000000"
+    },
+    {
+      "name": "YT Token C",
+      "symbol": "YT-C",
+      "address": "0x0EF308D70cf35460E26a3Eb42F3442Ff28cbE07C",
+      "index": "2",
+      "manager": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+      "hardCap": "10000000000000000000000000",
+      "redemptionTime": 1799733295,
+      "ytPrice": "1000000000000000000000000000000"
+    }
+  ],
+  "lastUpdate": "2026-01-12T05:55:05.405Z"
+}

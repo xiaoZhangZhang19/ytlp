@@ -1,0 +1,100 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "configuratorParams",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "baseToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "lendingPriceSource",
+        "type": "address"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyKink",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyPerYearInterestRateSlopeLow",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyPerYearInterestRateSlopeHigh",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "supplyPerYearInterestRateBase",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowKink",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowPerYearInterestRateSlopeLow",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowPerYearInterestRateSlopeHigh",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "borrowPerYearInterestRateBase",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "storeFrontPriceFactor",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint104",
+        "name": "baseBorrowMin",
+        "type": "uint104"
+      },
+      {
+        "internalType": "uint104",
+        "name": "targetReserves",
+        "type": "uint104"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "factory",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

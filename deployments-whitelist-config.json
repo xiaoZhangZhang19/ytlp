@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-01-12T05:56:01.673Z",
+  "operator": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+  "whitelistedTokens": {
+    "ytTokens": [
+      {
+        "name": "YT Token A",
+        "symbol": "YT-A",
+        "address": "0x7f9eEA491eE53045594ee4669327f0355aCd0e58",
+        "weight": 4000,
+        "maxUsdyAmount": "45000000000000000000000000",
+        "price": "1000000000000000000000000000000",
+        "isStable": false
+      },
+      {
+        "name": "YT Token B",
+        "symbol": "YT-B",
+        "address": "0x20B94C5E5b7361552E0548161a58696aA6FeDBd4",
+        "weight": 3000,
+        "maxUsdyAmount": "35000000000000000000000000",
+        "price": "1000000000000000000000000000000",
+        "isStable": false
+      },
+      {
+        "name": "YT Token C",
+        "symbol": "YT-C",
+        "address": "0x0EF308D70cf35460E26a3Eb42F3442Ff28cbE07C",
+        "weight": 2000,
+        "maxUsdyAmount": "25000000000000000000000000",
+        "price": "1000000000000000000000000000000",
+        "isStable": false
+      }
+    ],
+    "usdc": {
+      "name": "USDC",
+      "symbol": "USDC",
+      "address": "0x939cf46F7A4d05da2a37213E7379a8b04528F590",
+      "weight": 1000,
+      "maxUsdyAmount": "30000000000000",
+      "priceSource": "Chainlink (自动)",
+      "isStable": true
+    }
+  },
+  "totalWeight": "10000",
+  "poolComposition": "USDC/YT-A/YT-B/YT-C"
+}

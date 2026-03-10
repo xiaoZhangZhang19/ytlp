@@ -1,0 +1,626 @@
+diff --git a/node_modules/@openzeppelin/hardhat-upgrades/dist/deploy-proxy.js b/node_modules/@openzeppelin/hardhat-upgrades/dist/deploy-proxy.js
+index 01e2cd9..04e8e48 100644
+--- a/node_modules/@openzeppelin/hardhat-upgrades/dist/deploy-proxy.js
++++ b/node_modules/@openzeppelin/hardhat-upgrades/dist/deploy-proxy.js
+@@ -15,7 +15,95 @@ function makeDeployProxy(hre, defenderModule) {
+         opts = (0, utils_2.enableDefender)(hre, defenderModule, opts);
+         const { provider } = hre.network;
+         const manifest = await upgrades_core_1.Manifest.forNetwork(provider);
+-        const { impl, kind } = await (0, utils_1.deployProxyImpl)(hre, ImplFactory, opts);
++        
++        let impl;
++        let kind;
++        
++        // Check if deployment of implementation contract should use CREATE2
++        if (opts.create2Factory && opts.create2Factory.deployImpl !== false) {
++            const { getDeployData } = await Promise.resolve().then(() => require('./utils/deploy-impl'));
++            
++            // Get deployment data for validation
++            const deployData = await getDeployData(hre, ImplFactory, opts);
++            const { validateProxyImpl } = await Promise.resolve().then(() => require('./utils/validate-impl'));
++            await validateProxyImpl(deployData, opts);
++            
++            if (opts.kind === undefined) {
++                throw new Error('Broken invariant: Proxy kind is undefined');
++            }
++            kind = opts.kind;
++            
++            // Get the implementation contract bytecode
++            const implBytecode = ImplFactory.bytecode;
++            
++            // Implementation contract salt
++            let implSalt = opts.create2Factory.implSalt;
++            if (!implSalt) {
++                // If implSalt is not provided, generate one based on proxySalt
++                const proxySaltBytes = hre.ethers.getBytes(opts.create2Factory.salt);
++                const implSaltBytes = new Uint8Array(proxySaltBytes);
++                implSaltBytes[implSaltBytes.length - 1] ^= 0x01;
++                implSalt = hre.ethers.hexlify(implSaltBytes);
++            }
++            
++            // Calculate expected address to check if already deployed
++            const initCode = hre.ethers.concat([implBytecode, '0x']);
++            const expectedAddress = hre.ethers.getCreate2Address(
++                opts.create2Factory.address,
++                implSalt,
++                hre.ethers.keccak256(initCode)
++            );
++            
++            // Check if implementation already exists on chain
++            const existingCode = await hre.ethers.provider.getCode(expectedAddress);
++            const implExists = existingCode !== '0x';
++            
++            // Use fetchOrDeployGetDeployment to deploy and record to manifest
++            const deployment = await upgrades_core_1.fetchOrDeployGetDeployment(
++                deployData.version,
++                deployData.provider,
++                async () => {
++                    const abi = ImplFactory.interface.format(true);
++                    
++                    if (implExists) {
++                        // Contract already exists, just return the info
++                        console.log(` Contract already exists at address: ${expectedAddress}`);
++                        return {
++                            abi,
++                            layout: deployData.layout,
++                            address: expectedAddress,
++                            txHash: undefined,
++                        };
++                    }
++                    
++                    // Deploy implementation contract via CREATE2
++                    const { deployViaCreate2Factory } = await Promise.resolve().then(() => require('./utils/deploy'));
++                    const implDeployment = await deployViaCreate2Factory(
++                        hre,
++                        opts.create2Factory.address,
++                        implSalt,
++                        implBytecode,
++                        '0x'
++                    );
++                    return {
++                        abi,
++                        layout: deployData.layout,
++                        address: implDeployment.address,
++                        txHash: implDeployment.txHash,
++                        deployTransaction: implDeployment.deployTransaction,
++                        remoteDeploymentId: implDeployment.remoteDeploymentId || ''
++                    };
++                },
++                opts,
++                false
++            );
++            
++            impl = deployment.address;
++        } else {
++            const result = await (0, utils_1.deployProxyImpl)(hre, ImplFactory, opts);
++            impl = result.impl;
++            kind = result.kind;
++        }
+         const contractInterface = ImplFactory.interface;
+         const data = (0, utils_1.getInitializerData)(contractInterface, args, opts.initializer);
+         const deployFn = opts.deployFunction || utils_1.deploy;
+@@ -44,7 +132,54 @@ function makeDeployProxy(hre, defenderModule) {
+                     throw new upgrades_core_1.InitialOwnerUnsupportedKindError(kind);
+                 }
+                 const ProxyFactory = opts.proxyFactory || (await (0, utils_1.getProxyFactory)(hre, signer));
+-                proxyDeployment = Object.assign({ kind }, await deployFn(hre, opts, ProxyFactory, impl, data));
++                
++                // Check if using CREATE2 Factory
++                if (opts.create2Factory) {
++                    // Get the proxy contract bytecode
++                    const proxyBytecode = ProxyFactory.bytecode;
++                    
++                    // Encode constructor arguments: constructor(address implementation, bytes memory _data)
++                    const constructorArgs = hre.ethers.AbiCoder.defaultAbiCoder().encode(
++                        ['address', 'bytes'],
++                        [impl, data]
++                    );
++                    
++                    // Calculate expected proxy address
++                    const proxyInitCode = hre.ethers.concat([proxyBytecode, constructorArgs]);
++                    const expectedProxyAddress = hre.ethers.getCreate2Address(
++                        opts.create2Factory.address,
++                        opts.create2Factory.salt,
++                        hre.ethers.keccak256(proxyInitCode)
++                    );
++                    
++                    // Check if proxy already exists
++                    const existingProxyCode = await hre.ethers.provider.getCode(expectedProxyAddress);
++                    const proxyExists = existingProxyCode !== '0x';
++                    
++                    if (proxyExists) {
++                        console.log(` Contract already exists at address: ${expectedProxyAddress}`);
++                        proxyDeployment = {
++                            kind,
++                            address: expectedProxyAddress,
++                            txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
++                            remoteDeploymentId: ''
++                        };
++                    } else {
++                        // Deploy using CREATE2 Factory
++                        const { deployViaCreate2Factory } = await Promise.resolve().then(() => require('./utils/deploy'));
++                        const deployment = await deployViaCreate2Factory(
++                            hre,
++                            opts.create2Factory.address,
++                            opts.create2Factory.salt,
++                            proxyBytecode,
++                            constructorArgs
++                        );
++                        proxyDeployment = Object.assign({ kind }, deployment);
++                    }
++                } else {
++                    // Original deployment logic
++                    proxyDeployment = Object.assign({ kind }, await deployFn(hre, opts, ProxyFactory, impl, data));
++                }
+                 break;
+             }
+             case 'transparent': {
+@@ -53,7 +188,54 @@ function makeDeployProxy(hre, defenderModule) {
+                     throw new upgrades_core_1.UpgradesError('`initialOwner` must not be a ProxyAdmin contract.', () => `If the contract at address ${initialOwner} is not a ProxyAdmin contract and you are sure that this contract is able to call functions on an actual ProxyAdmin, skip this check with the \`unsafeSkipProxyAdminCheck\` option.`);
+                 }
+                 const TransparentUpgradeableProxyFactory = opts.proxyFactory || (await (0, utils_1.getTransparentUpgradeableProxyFactory)(hre, signer));
+-                proxyDeployment = Object.assign({ kind }, await deployFn(hre, opts, TransparentUpgradeableProxyFactory, impl, initialOwner, data));
++                
++                // Check if using CREATE2 Factory
++                if (opts.create2Factory) {
++                    // Get the proxy contract bytecode
++                    const proxyBytecode = TransparentUpgradeableProxyFactory.bytecode;
++                    
++                    // Encode constructor arguments: constructor(address _logic, address initialOwner, bytes memory _data)
++                    const constructorArgs = hre.ethers.AbiCoder.defaultAbiCoder().encode(
++                        ['address', 'address', 'bytes'],
++                        [impl, initialOwner, data]
++                    );
++                    
++                    // Calculate expected proxy address
++                    const proxyInitCode = hre.ethers.concat([proxyBytecode, constructorArgs]);
++                    const expectedProxyAddress = hre.ethers.getCreate2Address(
++                        opts.create2Factory.address,
++                        opts.create2Factory.salt,
++                        hre.ethers.keccak256(proxyInitCode)
++                    );
++                    
++                    // Check if proxy already exists
++                    const existingProxyCode = await hre.ethers.provider.getCode(expectedProxyAddress);
++                    const proxyExists = existingProxyCode !== '0x';
++                    
++                    if (proxyExists) {
++                        console.log(` Contract already exists at address: ${expectedProxyAddress}`);
++                        proxyDeployment = {
++                            kind,
++                            address: expectedProxyAddress,
++                            txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
++                            remoteDeploymentId: ''
++                        };
++                    } else {
++                        // Deploy using CREATE2 Factory
++                        const { deployViaCreate2Factory } = await Promise.resolve().then(() => require('./utils/deploy'));
++                        const deployment = await deployViaCreate2Factory(
++                            hre,
++                            opts.create2Factory.address,
++                            opts.create2Factory.salt,
++                            proxyBytecode,
++                            constructorArgs
++                        );
++                        proxyDeployment = Object.assign({ kind }, deployment);
++                    }
++                } else {
++                    // Original deployment logic
++                    proxyDeployment = Object.assign({ kind }, await deployFn(hre, opts, TransparentUpgradeableProxyFactory, impl, initialOwner, data));
++                }
+                 break;
+             }
+         }
+diff --git a/node_modules/@openzeppelin/hardhat-upgrades/dist/utils/deploy.js b/node_modules/@openzeppelin/hardhat-upgrades/dist/utils/deploy.js
+index 46c2c7f..7204eb1 100644
+--- a/node_modules/@openzeppelin/hardhat-upgrades/dist/utils/deploy.js
++++ b/node_modules/@openzeppelin/hardhat-upgrades/dist/utils/deploy.js
+@@ -1,6 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.deploy = deploy;
++exports.deployViaCreate2Factory = deployViaCreate2Factory;
+ const deploy_1 = require("../defender/deploy");
+ async function deploy(hre, opts, factory, ...args) {
+     if (opts?.useDefenderDeploy) {
+@@ -23,4 +24,76 @@ async function ethersDeploy(factory, ...args) {
+     const txHash = deployTransaction.hash;
+     return { address, txHash, deployTransaction };
+ }
++
++/**
++ * Deploy contract using CREATE2 Factory
++ */
++async function deployViaCreate2Factory(hre, factoryAddress, salt, proxyBytecode, constructorArgs) {
++    const [deployer] = await hre.ethers.getSigners();
++    
++    // Assemble the complete initCode
++    const initCode = hre.ethers.concat([proxyBytecode, constructorArgs]);
++    
++    // Calculate the expected address
++    const expectedAddress = hre.ethers.getCreate2Address(
++        factoryAddress,
++        salt,
++        hre.ethers.keccak256(initCode)
++    );
++    
++    // Get the Factory contract instance
++    const factoryContract = await hre.ethers.getContractAt(
++        [
++            'function deploy(bytes32 salt, bytes memory initCode, bytes memory data, uint256 create2ForwardValue, uint256 callForwardValue) external payable returns (address deployed)',
++            'event Deployed(address indexed addr)',
++        ],
++        factoryAddress,
++        deployer
++    );
++    
++    // Call the deploy function
++    const tx = await factoryContract.deploy(
++        salt,
++        initCode,
++        '0x',
++        0,
++        0,
++        { value: 0 }
++    );
++    
++    const receipt = await tx.wait();
++    
++    if (!receipt) {
++        throw new Error('Deployment transaction failed');
++    }
++    
++    // Get the actual deployed address from the event
++    let actualAddress = expectedAddress;
++    const deployedEvent = receipt.logs.find((log) => {
++        try {
++            const iface = new hre.ethers.Interface(['event Deployed(address indexed addr)']);
++            const parsed = iface.parseLog(log);
++            return parsed?.name === 'Deployed';
++        } catch {
++            return false;
++        }
++    });
++    
++    if (deployedEvent) {
++        const iface = new hre.ethers.Interface(['event Deployed(address indexed addr)']);
++        const parsed = iface.parseLog(deployedEvent);
++        actualAddress = parsed?.args[0];
++    }
++    
++    if (actualAddress.toLowerCase() !== expectedAddress.toLowerCase()) {
++        console.warn(`Warning: Actual address ${actualAddress} does not match expected address ${expectedAddress}`);
++    }
++    
++    return {
++        address: actualAddress,
++        txHash: receipt.hash,
++        deployTransaction: tx,
++        remoteDeploymentId: '',
++    };
++}
+ //# sourceMappingURL=deploy.js.map
+\ No newline at end of file
+diff --git a/node_modules/@openzeppelin/hardhat-upgrades/src/deploy-proxy.ts b/node_modules/@openzeppelin/hardhat-upgrades/src/deploy-proxy.ts
+index b912102..fa1f37a 100644
+--- a/node_modules/@openzeppelin/hardhat-upgrades/src/deploy-proxy.ts
++++ b/node_modules/@openzeppelin/hardhat-upgrades/src/deploy-proxy.ts
+@@ -52,7 +52,96 @@ export function makeDeployProxy(hre: HardhatRuntimeEnvironment, defenderModule:
+     const { provider } = hre.network;
+     const manifest = await Manifest.forNetwork(provider);
+ 
+-    const { impl, kind } = await deployProxyImpl(hre, ImplFactory, opts);
++    let impl: string;
++    let kind: ProxyDeployment['kind'];
++
++    // Check if deploying implementation contract using CREATE2
++    if (opts.create2Factory && opts.create2Factory.deployImpl !== false) {
++      const { getDeployData } = await import('./utils/deploy-impl');
++      const { fetchOrDeployGetDeployment } = await import('@openzeppelin/upgrades-core');
++      
++      // Get deployment data for validation
++      const deployData = await getDeployData(hre, ImplFactory, opts);
++      const { validateProxyImpl } = await import('./utils/validate-impl');
++      await validateProxyImpl(deployData, opts);
++      
++      if (opts.kind === undefined) {
++        throw new Error('Broken invariant: Proxy kind is undefined');
++      }
++      kind = opts.kind;
++      
++      // Get the implementation contract bytecode
++      const implBytecode = ImplFactory.bytecode;
++      
++      // Implementation contract salt (if provided, use it; otherwise use modified salt)
++      let implSalt = opts.create2Factory.implSalt;
++      if (!implSalt) {
++        // If implSalt is not provided, generate one based on proxySalt (flip the last byte)
++        const proxySaltBytes = hre.ethers.getBytes(opts.create2Factory.salt);
++        const implSaltBytes = new Uint8Array(proxySaltBytes);
++        implSaltBytes[implSaltBytes.length - 1] ^= 0x01; // Flip the last byte
++        implSalt = hre.ethers.hexlify(implSaltBytes);
++      }
++      
++      // Calculate expected address to check if already deployed
++      const initCode = hre.ethers.concat([implBytecode, '0x']);
++      const expectedAddress = hre.ethers.getCreate2Address(
++        opts.create2Factory.address,
++        implSalt,
++        hre.ethers.keccak256(initCode)
++      );
++      
++      // Check if implementation already exists on chain
++      const existingCode = await hre.ethers.provider.getCode(expectedAddress);
++      const implExists = existingCode !== '0x';
++      
++      // Use fetchOrDeployGetDeployment to deploy and record to manifest
++      const deployment = await fetchOrDeployGetDeployment(
++        deployData.version,
++        deployData.provider,
++        async () => {
++          const abi = ImplFactory.interface.format(true) as string[];
++          
++          if (implExists) {
++            // Contract already exists, just return the info
++            console.log(` Contract already exists at address: ${expectedAddress}`);
++            return {
++              abi,
++              layout: deployData.layout,
++              address: expectedAddress,
++              txHash: undefined as any,
++            };
++          }
++          
++          // Deploy implementation contract via CREATE2
++          const { deployViaCreate2Factory } = await import('./utils/deploy');
++          const implDeployment = await deployViaCreate2Factory(
++            hre,
++            opts.create2Factory.address,
++            implSalt,
++            implBytecode,
++            '0x' // Implementation contract usually has no constructor arguments
++          );
++          return {
++            abi,
++            layout: deployData.layout,
++            address: implDeployment.address,
++            txHash: implDeployment.txHash,
++            deployTransaction: implDeployment.deployTransaction,
++            remoteDeploymentId: implDeployment.remoteDeploymentId || ''
++          };
++        },
++        opts,
++        false
++      );
++      
++      impl = deployment.address;
++    } else {
++      // Original deployment logic
++      const result = await deployProxyImpl(hre, ImplFactory, opts);
++      impl = result.impl;
++      kind = result.kind;
++    }
+ 
+     const contractInterface = ImplFactory.interface;
+     const data = getInitializerData(contractInterface, args, opts.initializer);
+@@ -86,7 +175,54 @@ export function makeDeployProxy(hre: HardhatRuntimeEnvironment, defenderModule:
+         }
+ 
+         const ProxyFactory = opts.proxyFactory || (await getProxyFactory(hre, signer));
+-        proxyDeployment = Object.assign({ kind }, await deployFn(hre, opts, ProxyFactory, impl, data));
++
++        // Check if using CREATE2 Factory
++        if (opts.create2Factory) {
++          // Get the proxy contract bytecode
++          const proxyBytecode = ProxyFactory.bytecode;
++          
++          // Encode constructor arguments: constructor(address implementation, bytes memory _data)
++          const constructorArgs = hre.ethers.AbiCoder.defaultAbiCoder().encode(
++            ['address', 'bytes'],
++            [impl, data]
++          );
++          
++          // Calculate expected proxy address
++          const proxyInitCode = hre.ethers.concat([proxyBytecode, constructorArgs]);
++          const expectedProxyAddress = hre.ethers.getCreate2Address(
++            opts.create2Factory.address,
++            opts.create2Factory.salt,
++            hre.ethers.keccak256(proxyInitCode)
++          );
++          
++          // Check if proxy already exists
++          const existingProxyCode = await hre.ethers.provider.getCode(expectedProxyAddress);
++          const proxyExists = existingProxyCode !== '0x';
++          
++          if (proxyExists) {
++            console.log(` Contract already exists at address: ${expectedProxyAddress}`);
++            proxyDeployment = {
++              kind,
++              address: expectedProxyAddress,
++              txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
++              remoteDeploymentId: ''
++            };
++          } else {
++            // Deploy using CREATE2 Factory
++            const { deployViaCreate2Factory } = await import('./utils/deploy');
++            const deployment = await deployViaCreate2Factory(
++              hre,
++              opts.create2Factory.address,
++              opts.create2Factory.salt,
++              proxyBytecode,
++              constructorArgs
++            );
++            proxyDeployment = Object.assign({ kind }, deployment);
++          }
++        } else {
++          // Original deployment logic
++          proxyDeployment = Object.assign({ kind }, await deployFn(hre, opts, ProxyFactory, impl, data));
++        }
+         break;
+       }
+ 
+@@ -103,10 +239,57 @@ export function makeDeployProxy(hre: HardhatRuntimeEnvironment, defenderModule:
+ 
+         const TransparentUpgradeableProxyFactory =
+           opts.proxyFactory || (await getTransparentUpgradeableProxyFactory(hre, signer));
+-        proxyDeployment = Object.assign(
+-          { kind },
+-          await deployFn(hre, opts, TransparentUpgradeableProxyFactory, impl, initialOwner, data),
+-        );
++        
++        // Check if using CREATE2 Factory
++        if (opts.create2Factory) {
++          // Get the proxy contract bytecode
++          const proxyBytecode = TransparentUpgradeableProxyFactory.bytecode;
++          
++          // Encode constructor arguments: constructor(address _logic, address initialOwner, bytes memory _data)
++          const constructorArgs = hre.ethers.AbiCoder.defaultAbiCoder().encode(
++            ['address', 'address', 'bytes'],
++            [impl, initialOwner, data]
++          );
++          
++          // Calculate expected proxy address
++          const proxyInitCode = hre.ethers.concat([proxyBytecode, constructorArgs]);
++          const expectedProxyAddress = hre.ethers.getCreate2Address(
++            opts.create2Factory.address,
++            opts.create2Factory.salt,
++            hre.ethers.keccak256(proxyInitCode)
++          );
++          
++          // Check if proxy already exists
++          const existingProxyCode = await hre.ethers.provider.getCode(expectedProxyAddress);
++          const proxyExists = existingProxyCode !== '0x';
++          
++          if (proxyExists) {
++            console.log(` Contract already exists at address: ${expectedProxyAddress}`);
++            proxyDeployment = {
++              kind,
++              address: expectedProxyAddress,
++              txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
++              remoteDeploymentId: ''
++            };
++          } else {
++            // Deploy using CREATE2 Factory
++            const { deployViaCreate2Factory } = await import('./utils/deploy');
++            const deployment = await deployViaCreate2Factory(
++              hre,
++              opts.create2Factory.address,
++              opts.create2Factory.salt,
++              proxyBytecode,
++              constructorArgs
++            );
++            proxyDeployment = Object.assign({ kind }, deployment);
++          }
++        } else {
++          // Original deployment logic
++          proxyDeployment = Object.assign(
++            { kind },
++            await deployFn(hre, opts, TransparentUpgradeableProxyFactory, impl, initialOwner, data),
++          );
++        }
+         break;
+       }
+     }
+diff --git a/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts b/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts
+index 9543317..a8e2432 100644
+--- a/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts
++++ b/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts
+@@ -45,3 +45,77 @@ async function ethersDeploy(
+ 
+   return { address, txHash, deployTransaction };
+ }
++
++export async function deployViaCreate2Factory(
++  hre: HardhatRuntimeEnvironment,
++  factoryAddress: string,
++  salt: string,
++  proxyBytecode: string,
++  constructorArgs: string,
++): Promise<EthersDeployment> {
++  const [deployer] = await hre.ethers.getSigners();
++  
++  // Assemble the complete initCode = bytecode + constructor args
++  const initCode = hre.ethers.concat([proxyBytecode, constructorArgs]);
++  
++  // Calculate the expected address
++  const expectedAddress = hre.ethers.getCreate2Address(
++    factoryAddress,
++    salt,
++    hre.ethers.keccak256(initCode)
++  );
++  
++  // Get the Factory contract instance
++  const factoryContract = await hre.ethers.getContractAt(
++    [
++      'function deploy(bytes32 salt, bytes memory initCode, bytes memory data, uint256 create2ForwardValue, uint256 callForwardValue) external payable returns (address deployed)',
++      'event Deployed(address indexed addr)',
++    ],
++    factoryAddress,
++    deployer
++  );
++  
++  // Call the deploy function
++  const tx = await factoryContract.deploy(
++    salt,
++    initCode,
++    '0x', // After deployment, no additional call is needed
++    0,    // create2ForwardValue
++    0,    // callForwardValue
++    { value: 0 }
++  );
++  const receipt = await tx.wait();
++  
++  if (!receipt) {
++    throw new Error('Deployment transaction failed');
++  }
++  
++  // Get the actual deployed address from the event
++  let actualAddress = expectedAddress;
++  const deployedEvent = receipt.logs.find((log: any) => {
++    try {
++      const iface = new hre.ethers.Interface(['event Deployed(address indexed addr)']);
++      const parsed = iface.parseLog(log);
++      return parsed?.name === 'Deployed';
++    } catch {
++      return false;
++    }
++  });
++  
++  if (deployedEvent) {
++    const iface = new hre.ethers.Interface(['event Deployed(address indexed addr)']);
++    const parsed = iface.parseLog(deployedEvent);
++    actualAddress = parsed?.args[0];
++  }
++  
++  if (actualAddress.toLowerCase() !== expectedAddress.toLowerCase()) {
++    console.warn(`Warning: Actual address ${actualAddress} does not match expected address ${expectedAddress}`);
++  }
++  
++  return {
++    address: actualAddress,
++    txHash: receipt.hash,
++    deployTransaction: tx,
++    remoteDeploymentId: '',
++  };
++}
+diff --git a/node_modules/@openzeppelin/hardhat-upgrades/src/utils/options.ts b/node_modules/@openzeppelin/hardhat-upgrades/src/utils/options.ts
+index 3ee7954..05b4684 100644
+--- a/node_modules/@openzeppelin/hardhat-upgrades/src/utils/options.ts
++++ b/node_modules/@openzeppelin/hardhat-upgrades/src/utils/options.ts
+@@ -22,6 +22,16 @@ export type DeployFactoryOpts = {
+    * Allows to customize the deploy function used instead of utils/deploy.ts:deploy
+    */
+   deployFunction?: () => Promise<EthersOrDefenderDeployment>;
++
++  /**
++   * Use CREATE2 Factory to deploy proxy and implementation contracts, ensuring consistent addresses across chains
++   */
++  create2Factory?: {
++    address: string;         // Create2 Factory contract address
++    salt: string;            // 32 bytes salt for proxy contract
++    implSalt?: string;       // 32 bytes salt for implementation contract (optional)
++    deployImpl?: boolean;    // Whether to deploy implementation contract using CREATE2 (default true)
++  };
+ };
+ 
+ /**

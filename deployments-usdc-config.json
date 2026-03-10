@@ -1,0 +1,21 @@
+{
+  "network": "bscTestnet",
+  "chainId": "97",
+  "deployer": "0xa013422A5918CD099C63c8CC35283EACa99a705d",
+  "timestamp": "2026-01-12T05:52:56.820Z",
+  "contracts": {
+    "USDC": {
+      "address": "0x939cf46F7A4d05da2a37213E7379a8b04528F590",
+      "description": "USDC代币地址（已存在的合约）"
+    },
+    "ChainlinkUSDCPriceFeed": {
+      "address": "0x90c069C4538adAc136E051052E14c1cD799C41B7",
+      "description": "Chainlink USDC/USD 价格预言机",
+      "precision": "1e8"
+    }
+  },
+  "notes": {
+    "bsc": "BSC主网的USDC是18位精度",
+    "arbSepolia": "Arbitrum Sepolia的USDC是6位精度"
+  }
+}
